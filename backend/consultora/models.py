@@ -97,6 +97,8 @@ class Equipos(models.Model):
 # Usuario del sistema: reemplaza a auth_user. Los grupos y permisos
 # son los de Django (auth_group, auth_permission, auth_group_permissions).
 class Usuario(AbstractUser):
+    # Único porque el login es con correo y contraseña
+    email = models.EmailField(unique=True)
 
     class Meta:
         db_table = "usuarios"
