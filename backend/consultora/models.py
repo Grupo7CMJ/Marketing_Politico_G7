@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
@@ -92,36 +94,12 @@ class Equipos(models.Model):
         return self.nombre
 
 
-class Usuarios(models.Model):
-    id_usuario = models.AutoField(primary_key=True)
-    nombre_usuario = models.CharField(max_length=80, unique=True)
-    email = models.EmailField(
-        max_length=254,
-        unique=True,
-        null=True,
-        blank=True
-    )
-    password_hash = models.CharField(max_length=255)
-    activo = models.BooleanField(default=True)
-    creado_en = models.DateTimeField(auto_now_add=True)
+# Usuario del sistema: reemplaza a auth_user. Los grupos y permisos
+# son los de Django (auth_group, auth_permission, auth_group_permissions).
+class Usuario(AbstractUser):
 
     class Meta:
         db_table = "usuarios"
-
-    def __str__(self):
-        return self.nombre_usuario
-
-
-class Grupos(models.Model):
-    id_grupo = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=120, unique=True)
-    descripcion = models.TextField(blank=True, null=True)
-
-    class Meta:
-        db_table = "grupos"
-
-    def __str__(self):
-        return self.nombre
 
 
 class Militantes(models.Model):
@@ -138,7 +116,7 @@ class Militantes(models.Model):
     direccion = models.TextField(blank=True, null=True)
 
     id_usuario = models.OneToOneField(
-        Usuarios,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -147,14 +125,6 @@ class Militantes(models.Model):
 
     id_equipo = models.ForeignKey(
         Equipos,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="militantes"
-    )
-
-    id_grupo = models.ForeignKey(
-        Grupos,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -172,22 +142,10 @@ class Encuestados(models.Model):
     id_encuestado = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100, blank=True, null=True)
     apellido = models.CharField(max_length=100, blank=True, null=True)
-    documento = models.CharField(
-        max_length=30,
-        unique=True,
-        blank=True,
-        null=True
-    )
+    # Obligatorio y único: una persona responde un solo cuestionario
+    documento = models.CharField(max_length=30, unique=True)
     telefono = models.CharField(max_length=40, blank=True, null=True)
     direccion = models.TextField(blank=True, null=True)
-
-    id_grupo = models.ForeignKey(
-        Grupos,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="encuestados"
-    )
 
     creado_en = models.DateTimeField(auto_now_add=True)
 
@@ -196,44 +154,6 @@ class Encuestados(models.Model):
 
     def __str__(self):
         return f"{self.nombre or ''} {self.apellido or ''}".strip()
-
-
-class Permisos(models.Model):
-    id_permiso = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100, unique=True)
-    descripcion = models.TextField(blank=True, null=True)
-
-    grupos = models.ManyToManyField(
-        Grupos,
-        through="Permisosxgrupos",
-        related_name="permisos"
-    )
-
-    class Meta:
-        db_table = "permisos"
-
-    def __str__(self):
-        return self.nombre
-
-
-class Permisosxgrupos(models.Model):
-    id_grupo = models.ForeignKey(
-        Grupos,
-        on_delete=models.CASCADE
-    )
-    id_permiso = models.ForeignKey(
-        Permisos,
-        on_delete=models.CASCADE
-    )
-
-    class Meta:
-        db_table = "permisosxgrupos"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["id_grupo", "id_permiso"],
-                name="uq_permiso_grupo"
-            )
-        ]
 
 
 class Categorias(models.Model):
@@ -278,12 +198,12 @@ class Cuestionarios(models.Model):
 class Militantexcuestionarios(models.Model):
     id_militante = models.ForeignKey(
         Militantes,
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT
     )
 
     id_cuestionario = models.ForeignKey(
         Cuestionarios,
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT
     )
 
     asignado_en = models.DateTimeField(auto_now_add=True)
@@ -344,21 +264,22 @@ class Opciones(models.Model):
 class RespuestaCargada(models.Model):
     id_respuesta = models.AutoField(primary_key=True)
 
+    # PROTECT: borrar datos relacionados nunca elimina respuestas cargadas
     id_encuestado = models.ForeignKey(
         Encuestados,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="respuestas"
     )
 
     id_pregunta = models.ForeignKey(
         Preguntas,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="respuestas"
     )
 
     id_opcion = models.ForeignKey(
         Opciones,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="respuestas"
