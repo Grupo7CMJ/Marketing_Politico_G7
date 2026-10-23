@@ -1,0 +1,203 @@
+// useState: hook de React para guardar valores que cambian (lo que escribe el usuario, errores, etc.)
+import { useState } from 'react'
+// api: la función que ya tenés en src/api.js para hablar con Django
+import { api } from '../api'
+// Logo del águila (el archivo que guardaste en src/assets/logo.png)
+import logo from '../assets/logo.png'
+// Foto del lado izquierdo (guardala en src/assets/fondo.png)
+import fondo from '../assets/fondo.png'
+// Estilos de esta pantalla
+import './Login.css'
+
+// Componente Login. Recibe "onLogin", una función que se ejecuta cuando el login sale bien
+export default function Login({ onLogin }) {
+  // ----- ESTADOS (valores que React "recuerda" y que al cambiar redibujan la pantalla) -----
+  const [email, setEmail] = useState('')                  // texto del campo correo
+  const [password, setPassword] = useState('')            // texto del campo contraseña
+  const [showPassword, setShowPassword] = useState(false) // true = se ve la contraseña (ojito)
+  const [remember, setRemember] = useState(false)         // checkbox "Recordar"
+  const [error, setError] = useState('')                  // mensaje de error a mostrar
+  const [loading, setLoading] = useState(false)           // true mientras se espera al servidor
+
+  // ----- FUNCIÓN QUE SE EJECUTA AL APRETAR "Iniciar sesión" -----
+  async function handleSubmit(e) {
+    e.preventDefault() // evita que el navegador recargue la página al enviar el formulario
+    setError('')       // borra errores anteriores
+
+    // Validación simple: si falta correo o contraseña, avisa y corta acá
+    if (!email.trim() || !password) {
+      setError('Ingresá tu correo y tu contraseña.')
+      return
+    }
+
+    setLoading(true) // el botón pasa a "Ingresando…"
+    try {
+      // Envía correo y contraseña a Django.
+      // ⚠️ Cambiá '/auth/login/' por la ruta real de tu backend cuando la crees.
+      const data = await api('/auth/login/', {
+        method: 'POST',
+        body: JSON.stringify({ email: email.trim(), password }),
+      })
+
+      // Si marcó "Recordar" guarda el token de forma permanente (localStorage);
+      // si no, solo mientras la pestaña esté abierta (sessionStorage)
+      const storage = remember ? localStorage : sessionStorage
+      if (data?.token) storage.setItem('token', data.token)
+
+      onLogin?.(data) // avisa a App.jsx que el login fue exitoso
+    } catch {
+      // Si Django responde con error (datos incorrectos, servidor caído, etc.)
+      setError('Correo o contraseña incorrectos.')
+    } finally {
+      setLoading(false) // pase lo que pase, vuelve a habilitar el botón
+    }
+  }
+
+  // ----- LO QUE SE DIBUJA EN PANTALLA -----
+  return (
+    // Contenedor general de toda la pantalla
+    <main className="login">
+
+      {/* OLA SUPERIOR violeta (solo decoración).
+          viewBox define el "lienzo" del dibujo; preserveAspectRatio="none" hace que
+          se estire para ocupar todo el ancho de la pantalla */}
+      <svg
+        className="login__wave-top"
+        viewBox="0 0 1440 160"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M0 0 H1440 V70 C1180 150 900 20 620 80 C380 130 180 110 0 60 Z"
+          fill="#533693"
+        />
+      </svg>
+
+      {/* OLAS INFERIORES de colores.
+          Ocupan TODO el ancho de la pantalla, de borde izquierdo a borde derecho.
+          Son 3 capas apiladas: naranja (atrás), rosa (medio) y violeta (adelante) */}
+      <svg
+        className="login__wave-bottom"
+        viewBox="0 0 1440 260"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        {/* Capa naranja */}
+        <path
+          d="M0 120 C300 40 700 220 1000 120 C1200 55 1340 70 1440 30 V260 H0 Z"
+          fill="#fdb03e"
+        />
+        {/* Capa rosa */}
+        <path
+          d="M0 170 C260 110 620 250 960 175 C1190 125 1330 150 1440 110 V260 H0 Z"
+          fill="#d8267e"
+        />
+        {/* Capa violeta */}
+        <path
+          d="M0 215 C300 170 640 270 980 220 C1200 190 1340 205 1440 180 V260 H0 Z"
+          fill="#533693"
+        />
+      </svg>
+
+      {/* LADO IZQUIERDO: foto difuminada que se funde con el blanco hacia la derecha.
+          Es solo decoración (aria-hidden), por eso el img lleva alt vacío */}
+      <div className="login__photo" aria-hidden="true">
+        <img src={fondo} alt="" />
+      </div>
+
+      {/* LADO DERECHO: logo + formulario */}
+      <section className="login__panel">
+        {/* onSubmit: al enviar el formulario (botón o tecla Enter) llama a handleSubmit */}
+        <form className="login__form" onSubmit={handleSubmit} noValidate>
+
+          {/* Logo del águila */}
+          <img className="login__logo" src={logo} alt="Logo" />
+
+          {/* Título y subtítulo */}
+          <h1>Iniciar sesión</h1>
+          <p className="login__subtitle">Accedé a tu cuenta para continuar</p>
+
+          {/* Barrita de 4 colores debajo del título (violeta, celeste, rosa, naranja) */}
+          <div className="login__bar" aria-hidden="true">
+            <span /><span /><span /><span />
+          </div>
+
+          {/* ----- CAMPO CORREO ----- */}
+          <label htmlFor="email">Correo electrónico</label>
+          <div className="login__field">
+            {/* Ícono del sobre */}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" />
+            </svg>
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              placeholder="ejemplo@correo.com"
+              value={email}                              // el valor viene del estado
+              onChange={(e) => setEmail(e.target.value)} // cada tecla actualiza el estado
+            />
+          </div>
+
+          {/* ----- CAMPO CONTRASEÑA ----- */}
+          <label htmlFor="password">Contraseña</label>
+          <div className="login__field">
+            {/* Ícono del candado */}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="2" />
+              <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+            </svg>
+            <input
+              id="password"
+              // Si showPassword es true se ve el texto, si no se ven puntitos
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {/* Botón del ojito: alterna mostrar/ocultar la contraseña */}
+            <button
+              type="button" // "button" para que NO envíe el formulario
+              className="login__eye"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+                {/* Si la contraseña está visible, dibuja una raya tachando el ojo */}
+                {showPassword && <path d="M4 4l16 16" />}
+              </svg>
+            </button>
+          </div>
+
+          {/* ----- FILA: checkbox "Recordar" + link "¿Olvidaste tu contraseña?" ----- */}
+          <div className="login__row">
+            <label className="login__check">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              <span>Recordar</span>
+            </label>
+            {/* Por ahora el link no hace nada (preventDefault). Después le ponés la ruta real */}
+            <a href="#" onClick={(e) => e.preventDefault()}>
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          {/* Mensaje de error: solo aparece si "error" tiene texto */}
+          {error && <p className="login__error" role="alert">{error}</p>}
+
+          {/* Botón principal. Se deshabilita mientras carga para evitar doble clic */}
+          <button className="login__submit" type="submit" disabled={loading}>
+            {loading ? 'Ingresando…' : 'Iniciar sesión'}
+          </button>
+        </form>
+      </section>
+    </main>
+  )
+}
