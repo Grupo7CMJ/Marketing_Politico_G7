@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
+from .models import Rutas
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -35,3 +37,26 @@ class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ["id", "username", "email", "first_name", "last_name", "grupos"]
+
+
+# ----- RUTAS -----
+class RutaSerializer(serializers.ModelSerializer):
+    cantidad_equipos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Rutas
+        fields = ["id_ruta", "nombre", "descripcion", "cantidad_equipos"]
+
+    def get_cantidad_equipos(self, obj):
+        # La vista ya la calcula con annotate; si no está (ej. al crear), la cuenta
+        valor = getattr(obj, "cantidad_equipos", None)
+        return valor if valor is not None else obj.equipos.count()
+
+    def validate_nombre(self, value):
+        # No permite dos rutas con el mismo nombre
+        repetidas = Rutas.objects.filter(nombre__iexact=value)
+        if self.instance:
+            repetidas = repetidas.exclude(pk=self.instance.pk)
+        if repetidas.exists():
+            raise serializers.ValidationError("Ya existe una ruta con ese nombre.")
+        return value

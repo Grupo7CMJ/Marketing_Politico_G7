@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 // Mismo logo que el login
 import logo from '../assets/logo.png'
 import './Menu.css'
+// Pantalla de gestión de rutas
+import Rutas from './Rutas'
 
 // ----- ÍCONOS -----
 // Cada ícono es una lista de trazos SVG (líneas finas, como los del login)
@@ -479,10 +481,14 @@ export default function Menu({ user, onLogout }) {
             </button>
             <h1>{elegida.nombre}</h1>
             <div className="menu__bar" aria-hidden="true"><span /><span /><span /><span /></div>
-            <div className="menu__vacio">
-              <Icono nombre={elegida.id} />
-              <p>Próximamente: listado de la tabla <code>{elegida.tabla}</code></p>
-            </div>
+                        {elegida.id === 'rutas' ? (
+              <Rutas />
+            ) : (
+              <div className="menu__vacio">
+                <Icono nombre={elegida.id} />
+                <p>Próximamente: listado de la tabla <code>{elegida.tabla}</code></p>
+              </div>
+            )}
           </section>
         ) : (
           <div key="inicio" className="menu__vista">

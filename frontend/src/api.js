@@ -22,6 +22,20 @@ export async function api(endpoint, options = {}) {
       ...options.headers,
     },
   })
-  if (!res.ok) throw new Error(`Error ${res.status} en ${endpoint}`)
+
+  if (!res.ok) {
+    // Django explica qué campo falló, por ejemplo {"nombre": ["Ya existe..."]}
+    let data = null
+    try {
+      data = await res.json()
+    } catch {
+      // la respuesta no traía cuerpo
+    }
+    const error = new Error(`Error ${res.status} en ${endpoint}`)
+    error.status = res.status
+    error.data = data
+    throw error
+  }
+
   return res.status === 204 ? null : res.json()
 }
