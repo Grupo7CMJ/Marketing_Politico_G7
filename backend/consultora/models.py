@@ -113,6 +113,9 @@ class Campanas(models.Model):
 # Usuario del sistema: reemplaza a auth_user. Los grupos y permisos
 # son los de Django (auth_group, auth_permission, auth_group_permissions).
 class Usuario(AbstractUser):
+    # Único porque el login es con correo y contraseña
+    email = models.EmailField(unique=True)
+
     id_campana = models.ForeignKey(
         Campanas,
         on_delete=models.PROTECT,
@@ -120,7 +123,7 @@ class Usuario(AbstractUser):
         blank=True,
         related_name="usuarios"
     )
- 
+
     class Meta:
         db_table = "usuarios"
  

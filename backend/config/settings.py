@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
     "consultora",
 ]
@@ -151,5 +152,9 @@ MAILERS = {
 CORS_ALLOW_ALL_ORIGINS = True  # solo en desarrollo
 
 REST_FRAMEWORK = {
+    # El frontend manda el header "Authorization: Token <token>"
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
 }
