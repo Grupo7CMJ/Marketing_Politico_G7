@@ -1,17 +1,40 @@
-import { useState } from 'react'
-// Importa la pantalla de login que creamos
+import { useEffect, useState } from 'react'
+import { api, clearToken, getToken } from './api'
+// Pantallas del sistema
 import Login from './components/Login'
+import Menu from './components/Menu'
 
 function App() {
   // "user" guarda los datos del usuario logueado. null = nadie inició sesión todavía
   const [user, setUser] = useState(null)
+  // true mientras se revisa si ya había una sesión guardada (para no mostrar el login de golpe)
+  const [checking, setChecking] = useState(() => Boolean(getToken()))
 
-  // Si no hay usuario, muestra el login.
-  // Cuando el login sale bien, Login llama a setUser(...) y se pasa a la siguiente pantalla
-  if (!user) return <Login onLogin={setUser} />
+  // Al abrir la página: si hay un token guardado, le pregunta a Django de quién es
+  useEffect(() => {
+    if (!getToken()) return
+    api('/auth/me/')
+      .then(setUser)
+      .catch(clearToken) // token vencido o borrado: se pide login de nuevo
+      .finally(() => setChecking(false))
+  }, [])
 
-  // Acá va el resto de tu sistema (dashboard, menú, etc.). Por ahora un texto de prueba
-  return <h1>Sesión iniciada</h1>
+  async function handleLogout() {
+    try {
+      await api('/auth/logout/', { method: 'POST' })
+    } catch {
+      // Aunque falle el servidor, igual se cierra la sesión en el navegador
+    }
+    clearToken()
+    setUser(null)
+  }
+
+  if (checking) return null
+
+  // Si no hay usuario, muestra el login. El login devuelve {token, usuario}
+  if (!user) return <Login onLogin={(data) => setUser(data.usuario)} />
+
+  return <Menu user={user} onLogout={handleLogout} />
 }
 
 export default App
