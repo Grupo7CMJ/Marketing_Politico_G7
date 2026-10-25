@@ -62,11 +62,7 @@ class Rutas(models.Model):
     id_ruta = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=120)
     descripcion = models.TextField(blank=True, null=True)
-    id_calle = models.ForeignKey(
-        Calles,
-        on_delete=models.PROTECT,
-        related_name="rutas"
-    )
+    
  
     class Meta:
         db_table = "rutas"
