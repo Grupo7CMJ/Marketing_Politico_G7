@@ -1,0 +1,115 @@
+/* ===== ESTILOS COMUNES A TODAS LAS PANTALLAS DE TABLAS ===== */
+/* Usan los colores definidos en .menu (Menu.css), porque las pantallas se muestran dentro del menú.
+   Prefijo "pantalla__" para no chocar con las clases del menú */
+
+.pantalla { display: flex; flex-direction: column; gap: 16px; }
+
+/* ----- Buscador + botón de alta ----- */
+.pantalla__barra { display: flex; flex-wrap: wrap; gap: 12px; }
+.pantalla__buscar {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  background: #fff;
+}
+.pantalla__buscar:focus,
+.pantalla__campo input:focus {
+  outline: 2px solid var(--purple);
+  outline-offset: 1px;
+}
+
+.pantalla__boton {
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--purple);
+  cursor: pointer;
+  transition: transform 0.16s var(--ease-out), background-color 0.16s;
+}
+.pantalla__boton:active { transform: scale(0.97); }
+.pantalla__boton:disabled { opacity: 0.6; cursor: default; }
+.pantalla__boton--suave { color: var(--purple); background: #eeebf6; }
+@media (hover: hover) and (pointer: fine) {
+  .pantalla__boton:hover { background: var(--purple-dark); }
+  .pantalla__boton--suave:hover { background: #e2ddf0; }
+}
+
+/* ----- Formulario ----- */
+.pantalla__form { animation: vista-entrar 0.2s var(--ease-out) both; }
+.pantalla__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.pantalla__campo { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
+.pantalla__campo--ancho { grid-column: 1 / -1; }
+.pantalla__campo input,
+.pantalla__campo select {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 400;
+  color: inherit;
+  background: #fff;
+}
+.pantalla__campo select:focus { outline: 2px solid var(--purple); outline-offset: 1px; }
+.pantalla__campo select:disabled { color: var(--muted); background: var(--bg); cursor: not-allowed; }
+/* Subtítulo que separa bloques del formulario ("Datos personales", "Asignación") */
+.pantalla__grupo {
+  margin: 18px 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--purple);
+}
+.pantalla__grupo:first-of-type { margin-top: 0; }
+/* Texto de ayuda chiquito debajo de un campo */
+.pantalla__ayuda { font-size: 12px; font-weight: 400; color: var(--muted); }
+.pantalla__acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+.pantalla__error { color: var(--pink); font-weight: 500; }
+
+/* ----- Listado ----- */
+.pantalla__tabla-caja { padding: 0; overflow-x: auto; } /* en celular la tabla scrollea sola, no la página */
+.pantalla__aviso { margin: 0; padding: 40px 20px; text-align: center; color: var(--muted); }
+.pantalla__tabla { width: 100%; border-collapse: collapse; font-size: 15px; }
+.pantalla__tabla th,
+.pantalla__tabla td { padding: 13px 18px; text-align: left; white-space: nowrap; }
+.pantalla__tabla th {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.pantalla__tabla tbody tr + tr td { border-top: 1px solid var(--line); }
+
+.pantalla__fila-acciones { text-align: right; }
+.pantalla__fila-acciones button {
+  margin-left: 6px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple);
+  background: #eeebf6;
+  cursor: pointer;
+}
+.pantalla__fila-acciones .is-peligro { color: var(--pink); background: #fbe6f0; }
+
+/* Movimiento reducido: el formulario solo aparece, sin deslizarse (igual que en Menu.css) */
+@media (prefers-reduced-motion: reduce) {
+  .pantalla__form { animation-name: solo-aparecer; }
+  .pantalla__boton { transition: none; }
+}

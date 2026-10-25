@@ -1,0 +1,178 @@
+/* ===== PANTALLA DE INICIO ===== */
+/* Usa los colores definidos en .menu (Menu.css). Prefijo "inicio__" para no chocar con nadie */
+
+/* ----- Saludo ----- */
+.inicio__hola { margin: 0; font-size: 42px; font-weight: 800; letter-spacing: -0.02em; }
+.inicio__sub { margin: 6px 0 14px; color: var(--muted); font-size: 18px; }
+/* La manito saluda una vez al entrar */
+.inicio__mano {
+  display: inline-block;
+  transform-origin: 70% 80%;
+  animation: saludar 1.6s ease-in-out 0.4s both;
+}
+@keyframes saludar {
+  0%, 60%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(16deg); }
+  20%, 40% { transform: rotate(-8deg); }
+}
+
+/* ===== FILA DE NÚMEROS ===== */
+.inicio__resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 28px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(17, 17, 17, 0.04);
+}
+.inicio__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 26px 8px;
+}
+.inicio__stat + .inicio__stat { border-left: 1px solid var(--line); }
+.inicio__stat strong { font-size: 40px; font-weight: 800; line-height: 1; }
+.inicio__stat span { font-size: 15px; color: var(--muted); text-align: center; }
+
+/* ===== TARJETAS DE COLORES ===== */
+.inicio__cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);  /* PC: 4 en una fila */
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.inicio__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  min-height: 210px;
+  padding: 22px;
+  border: 0;
+  border-radius: 20px;
+  font: inherit;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(17, 17, 17, 0.08);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+/* Reflejo de luz que cruza la tarjeta al pasar el mouse */
+.inicio__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+.inicio__card:active { transform: scale(0.97); transition-duration: 0.12s; }
+@media (hover: hover) and (pointer: fine) {
+  .inicio__card:hover::after { transform: translateX(100%); transition: transform 0.7s var(--ease-out); }
+  .inicio__card:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(17, 17, 17, 0.16); }
+  /* Al apretar mantiene la subida del hover: si no, "cae" 3px de golpe */
+  .inicio__card:hover:active { transform: translateY(-3px) scale(0.97); }
+  .inicio__card:hover .inicio__card-go { transform: translateX(3px); }  /* la flechita se adelanta */
+}
+.inicio__card-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.inicio__card-icon .icono { width: 28px; height: 28px; }
+.inicio__card-text { display: flex; flex-direction: column; gap: 2px; padding-right: 40px; }
+.inicio__card-text strong { font-size: 23px; }
+.inicio__card-text small { font-size: 14px; opacity: 0.9; }
+/* Circulito con la flecha, abajo a la derecha */
+.inicio__card-go {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: transform 0.25s var(--ease-out);
+}
+.inicio__card-go .icono { width: 18px; height: 18px; }
+
+/* ===== CALENDARIO DE LA SEMANA ===== */
+.inicio__semana {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+}
+.inicio__semana-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+.inicio__semana-head h2 { margin: 0; font-size: 21px; }
+.inicio__semana-head span { font-size: 14px; color: var(--muted); }
+.inicio__semana-head span::first-letter { text-transform: uppercase; }  /* "octubre" → "Octubre" */
+.inicio__dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.inicio__dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0;
+  border-radius: 12px;
+}
+.inicio__dia small { font-size: 14px; color: var(--muted); }
+.inicio__dia strong { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; font-size: 19px; }
+/* El día de hoy va en un círculo violeta */
+.inicio__dia.is-today strong {
+  position: relative;
+  color: #fff;
+  background: var(--purple);
+}
+/* Halo que late alrededor de hoy (se agranda y se desvanece) */
+.inicio__dia.is-today strong::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--purple);
+  animation: latir 2.4s var(--ease-out) infinite;
+}
+
+/* ===== MOVIMIENTO REDUCIDO ===== */
+@media (prefers-reduced-motion: reduce) {
+  .inicio__dia.is-today strong::after,
+  .inicio__mano { animation: none; }
+  .inicio__card:hover::after { transition: none; }
+  .inicio__card:hover,
+  .inicio__card:active,
+  .inicio__card:hover:active,
+  .inicio__card:hover .inicio__card-go { transform: none; }
+}
+
+/* ===== PANTALLAS CHICAS ===== */
+/* Tablet: tarjetas de a 2 */
+@media (max-width: 1250px) {
+  .inicio__cards { grid-template-columns: repeat(2, 1fr); }
+}
+/* Celular: se achican textos y tarjetas */
+@media (max-width: 520px) {
+  .inicio__hola { font-size: 28px; }
+  .inicio__sub { font-size: 16px; }
+  .inicio__cards { gap: 12px; }
+  .inicio__card { min-height: 150px; padding: 14px; }
+  .inicio__card-icon { width: 44px; height: 44px; }
+  .inicio__card-icon .icono { width: 22px; height: 22px; }
+  .inicio__card-text strong { font-size: 18px; }
+  .inicio__card-text small { font-size: 13px; }
+  .inicio__card-go { right: 12px; bottom: 12px; width: 32px; height: 32px; }
+  .inicio__stat { padding: 18px 6px; }
+  .inicio__stat strong { font-size: 28px; }
+  .inicio__stat span { font-size: 12px; }
+  .inicio__semana { padding: 18px; }
+  .inicio__dia strong { width: 34px; height: 34px; font-size: 15px; }
+}

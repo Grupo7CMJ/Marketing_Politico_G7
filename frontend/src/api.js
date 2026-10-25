@@ -22,6 +22,11 @@ export async function api(endpoint, options = {}) {
       ...options.headers,
     },
   })
-  if (!res.ok) throw new Error(`Error ${res.status} en ${endpoint}`)
+  if (!res.ok) {
+    const error = new Error(`Error ${res.status} en ${endpoint}`)
+    // Django manda los errores de validación por campo, ej: {documento: ["Ya existe…"]}
+    error.datos = await res.json().catch(() => null)
+    throw error
+  }
   return res.status === 204 ? null : res.json()
 }
